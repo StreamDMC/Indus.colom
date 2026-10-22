@@ -1,170 +1,428 @@
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff5ef">
+  <title>Pastel 3D</title>
+  <style>
+    * { box-sizing: border-box; }
 
-            body {
-               background-color: rgb(0, 0, 0);
-               background-size: cover;
-               background-position: center;
-               background-attachment: fixed;
-               color: rgb(255, 255, 255);
-               font-family: Arial, sans-serif;
-               text-align: center;
-               display: flex;
-               height: 100vh;
-               overflow: hidden;
-              }
+    html, body {
+      width: 100%;
+      min-width: 280px;
+      min-height: 100%;
+      margin: 0;
+    }
 
-            /* Menú lateral */
-            .sidebar {
-                width: 280px;
-                background-color: rgba(0, 0, 0, 0.9);
-                border-right: 1px solid rgba(255, 255, 255, 0.1);
-                padding: 20px;
-                overflow-y: auto;
-                position: fixed;
-                left: 0;
-                top: 0;
-                height: 100vh;
-            }
+    body {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 49%, rgba(255, 224, 220, .8), transparent 35%),
+        radial-gradient(ellipse at 50% 100%, rgba(242, 219, 195, .28), transparent 55%),
+        #fff9f4;
+    }
 
-            .logo {
-                font-size: 28px;
-                font-weight: bold;
-                margin-bottom: 30px;
-                color: #1DA1F2;
-            }
+    .stage {
+      position: relative;
+      width: min(100vw, 600px);
+      height: min(100svh, 520px);
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      perspective: 1100px;
+      isolation: isolate;
+    }
 
-            .menu-items {
-                list-style: none;
-            }
+    .shadow {
+      position: absolute;
+      z-index: -1;
+      top: calc(50% + 158px);
+      left: 50%;
+      width: 270px;
+      height: 27px;
+      border-radius: 50%;
+      background: rgba(93, 53, 47, .18);
+      filter: blur(18px);
+      transform: translate(-50%, -50%) rotateX(68deg);
+    }
 
-            .menu-item {
-                padding: 15px 20px;
-                margin-bottom: 10px;
-                font-size: 18px;
-                cursor: pointer;
-                border-radius: 25px;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }
+    .cake-float {
+      position: relative;
+      width: 380px;
+      height: 360px;
+      transform-style: preserve-3d;
+      animation: float 4.8s ease-in-out infinite;
+    }
 
-            .menu-item:hover {
-                background-color: rgba(29, 161, 242, 0.1);
-            }
+    .cake-spin {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      animation: turn 24s linear infinite;
+    }
 
-            .menu-item.active {
-                background-color: rgba(29, 161, 242, 0.2);
-                color: #1DA1F2;
-                font-weight: bold;
-            }
+    .cake-model {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      width: 350px;
+      height: 300px;
+      transform: translateX(-50%);
+      transform-style: preserve-3d;
+    }
 
-            /* Contenido principal */
-            .main-content {
-                margin-left: 280px;
-                flex: 1;
-                overflow-y: auto;
-                padding: 20px;
-                background-color: rgb(0, 0, 0);
-            }
+    .cylinder {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      transform-style: preserve-3d;
+    }
 
-            .section {
-                display: none;
-            }
+    .cylinder__side {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      transform: translate(-50%, -50%);
+      transform-style: preserve-3d;
+    }
 
-            .section.active {
-                display: block;
-            }
+    .cylinder__face {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      border-right: 1px solid rgba(102, 47, 49, .1);
+      backface-visibility: hidden;
+    }
 
-         /* Bordes redondeados para imágenes (centradas y permiten estar lado a lado) */
-          img, .rounded-img { border-radius: 12px; display: inline-block; vertical-align: middle; max-width: 100%; height: auto; }
-         /* Clase opcional para imágenes circulares */
-         .rounded-circle { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; overflow: hidden; }
-         /* Icono inline al tamaño de la letra */
-         .inline-icon { width: 1em; height: 1em; display: inline-block; vertical-align: text-bottom; object-fit: contain; margin-left: 0.25em; }
+    .cylinder__top,
+    .cylinder__bottom {
+      position: absolute;
+      left: 50%;
+      border-radius: 50%;
+      transform-style: preserve-3d;
+    }
 
-         /* Separador de línea blanca */
-         .separator {
-             border-top: 2px solid rgba(255, 255, 255, 0.3);
-             margin: 30px 0;
-         }
+    .cylinder__top {
+      top: 0;
+      border: 1px solid rgba(151, 75, 76, .16);
+      transform: translate(-50%, -50%) rotateX(90deg);
+    }
 
-         /* Separador más grueso */
-         .separator-thick {
-             border-top: 3px solid rgba(255, 255, 255, 0.5);
-             margin: 40px 0;
-         }
+    .cylinder__bottom {
+      bottom: 0;
+      transform: translate(-50%, 50%) rotateX(90deg);
+    }
 
-        </style>
-    </head>
-    <body>
-        <!-- Menú Lateral -->
-        <aside class="sidebar">
-            <div class="logo">📸</div>
-            <ul class="menu-items">
-                <li class="menu-item active" onclick="cambiarSeccion('inicio')">
-                    <span>🏠 𝑰𝒏𝒊𝒄𝒊𝒐</span>
-                </li>
-                <li class="menu-item" onclick="cambiarSeccion('galeria')">
-                    <span>🖼️ 𝑮𝒂𝒍𝒆𝒓𝒊𝒂</span>
-                </li>
-            </ul>
-        </aside>
+    .tier--plate .cylinder__face {
+      background: linear-gradient(180deg, #faf4ec, #d6c1ad 70%, #b99b82);
+      box-shadow: inset 0 3px 4px rgba(255,255,255,.65);
+    }
+    .tier--plate .cylinder__top {
+      background: radial-gradient(ellipse at 45% 38%, #fffdf9 0 34%, #ead8c6 77%, #c8ab91 100%);
+    }
+    .tier--plate .cylinder__bottom { background: #bea38c; }
 
-        <!-- Contenido Principal -->
-        <main class="main-content">
-            <!-- Sección: Inicio -->
-            <section id="inicio" class="section active">
-        <h1>𝓒𝓪𝓹𝓽𝓾𝓻𝓪𝓶𝓸𝓼 𝓵𝓪 𝓮𝓼𝓮𝓷𝓬𝓲𝓪 𝓭𝓮 𝓬𝓪𝓭𝓪 𝓶𝓸𝓶𝓮𝓷𝓽𝓸</h1>
-        <p>ℬ𝒾ℯ𝓃𝓋ℯ𝓃𝒾𝒹ℴ 𝒶 𝓊𝓃 𝓅ℯ𝓆𝓊ℯñℴ ℯ𝓂𝓅𝓇ℯ𝓃𝒹𝒾𝓂𝒾ℯ𝓃𝓉ℴ 𝒹ℯ 𝒻ℴ𝓉ℴ𝓈 🙂👍</p>
-        <div class="separator"></div>
-        <img src="https://raw.githubusercontent.com/StreamDMC/Indus.colom/main/SAM_0071.JPG" alt="Logo flor 777" width="412" height="284">
-        <div class="separator"></div>
-        <h2>¿𝓠𝓾𝓲𝓮𝓷𝓮𝓼 𝓼𝓸𝓶𝓸𝓼?</h2>
-        <p>𝑺𝒐𝒎𝒐𝒔 𝒖𝒏 𝒑𝒆𝒒𝒖𝒆ñ𝒐 𝒆𝒒𝒖𝒊𝒑𝒐 𝒒𝒖𝒆 𝒅𝒆𝒔𝒆𝒂 𝒄𝒓𝒆𝒄𝒆𝒓 𝒚 𝒍𝒍𝒆𝒈𝒂𝒓 𝒂 𝒎𝒂𝒔 𝒈𝒆𝒏𝒕𝒆 𝒑𝒂𝒓𝒂 𝒕𝒓𝒂𝒏𝒔𝒎𝒊𝒕𝒊𝒓 𝒆𝒍 𝒂𝒓𝒕𝒆 𝒂𝒕𝒓𝒂𝒗𝒆𝒛 𝒅𝒆 𝒍𝒂 𝒇𝒐𝒕𝒐𝒈𝒓𝒂𝒇𝒊𝒂 𝒅𝒂𝒏𝒅𝒐𝒍𝒆:</p>
-        <p>𝑨𝒍𝒎𝒂, 𝒑𝒆𝒓𝒔𝒐𝒏𝒂𝒍𝒊𝒅𝒂𝒅 𝒖𝒏𝒊𝒄𝒂, 𝒗𝒊𝒅𝒂, 𝒏𝒊𝒕𝒊𝒅𝒆𝒛, 𝒄𝒐𝒍𝒐𝒓 𝒚 𝒉𝒂𝒄𝒆𝒓 𝑪𝑨𝑫𝑨 𝑴𝑶𝑴𝑬𝑵𝑻𝑶 𝑼𝑵𝑰𝑪𝑶</p>
-        <div class="separator"></div>
-        <h2>¿𝓠𝓾𝓮 𝓷𝓸𝓼 𝓭𝓲𝓯𝓮𝓻𝓮𝓷𝓬𝓲𝓪 𝓭𝓮 𝓵𝓸𝓼 𝓸𝓽𝓻𝓸𝓼 𝓯𝓸𝓽𝓸𝓰𝓻𝓪𝓯𝓸𝓼?</h2>
-        <p>𝑵𝒐 𝒔𝒐𝒍𝒐 𝒉𝒂𝒄𝒆𝒎𝒐𝒔 𝒇𝒐𝒕𝒐𝒔, 𝑯𝒂𝒄𝒆𝒎𝒐𝒔 𝒎𝒐𝒎𝒆𝒏𝒕𝒐𝒔 𝒊𝒏𝒐𝒍𝒗𝒊𝒅𝒂𝒃𝒍𝒆𝒔 👇</p>
-            </section>
+    .tier--base .cylinder__face {
+      background: linear-gradient(180deg, #f4d3cf, #e9b6b5 16%, #e3a6a8 74%, #ce858c);
+      box-shadow: inset 0 5px 7px rgba(255,255,255,.17);
+    }
+    .tier--base .cylinder__top {
+      background:
+        radial-gradient(circle at 31% 42%, #cf6074 0 2px, transparent 2.5px),
+        radial-gradient(circle at 64% 59%, #d97283 0 2px, transparent 2.5px),
+        radial-gradient(ellipse at 38% 34%, #fff0e7, #f6d9d2 57%, #e8b8b4);
+    }
+    .tier--base .cylinder__bottom { background: #cb8588; }
 
-            <!-- Sección: Galería -->
-            <section id="galeria" class="section">
-                <h1>𝓖𝓐𝓛𝓔𝓡𝓘𝓐</h1>
-                <p>𝓛𝓸 𝓶𝓮𝓳𝓸𝓻 𝓭𝓮 𝓵𝓸 𝓶𝓮𝓳𝓸𝓻</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
-                    <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; overflow: hidden;">
-                        <img src="https://raw.githubusercontent.com/StreamDMC/Indus.colom/main/SAM_0071.JPG" alt="Foto 1">
-                    </div>
-                    <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; overflow: hidden;">
-                        <img src="https://raw.githubusercontent.com/StreamDMC/Indus.colom/main/SAM_0080.JPG" alt="Foto 2">
-                    </div>
-                </div>
-            </section>
-        </main>
+    .tier--middle .cylinder__face {
+      background: linear-gradient(180deg, #f5d8cd, #edc1b3 18%, #e6b09f 77%, #d79287);
+      box-shadow: inset 0 5px 7px rgba(255,255,255,.2);
+    }
+    .tier--middle .cylinder__top {
+      background:
+        radial-gradient(circle at 36% 38%, #c84f68 0 2px, transparent 2.5px),
+        radial-gradient(circle at 66% 61%, #d96b7c 0 2px, transparent 2.5px),
+        radial-gradient(ellipse at 40% 34%, #fff1e7, #f8dfd2 61%, #ecc1b5);
+    }
+    .tier--middle .cylinder__bottom { background: #ce8d83; }
 
-        <script>
-            function cambiarSeccion(seccion) {
-                // Ocultar todas las secciones
-                const secciones = document.querySelectorAll('.section');
-                secciones.forEach(s => s.classList.remove('active'));
+    .tier--top .cylinder__face {
+      background: linear-gradient(180deg, #f7d8ce, #f0bdb2 18%, #e9afa7 74%, #d68d8d);
+      box-shadow: inset 0 5px 7px rgba(255,255,255,.2);
+    }
+    .tier--top .cylinder__top {
+      background:
+        radial-gradient(circle at 30% 62%, #c84f68 0 2px, transparent 2.5px),
+        radial-gradient(circle at 69% 35%, #d96b7c 0 2px, transparent 2.5px),
+        radial-gradient(ellipse at 39% 34%, #fff5e8, #fae4d4 65%, #eec6b5);
+    }
+    .tier--top .cylinder__bottom { background: #cf8c89; }
 
-                // Mostrar la sección seleccionada
-                document.getElementById(seccion).classList.add('active');
+    .icing-ring .cylinder__face {
+      border-right-color: rgba(181, 128, 110, .12);
+      background: linear-gradient(180deg, #fff3e3, #f7e3ce 70%, #ebcfbb);
+      box-shadow: inset 0 2px 3px rgba(255,255,255,.78);
+    }
+    .icing-ring .cylinder__top {
+      border: 0;
+      background: radial-gradient(ellipse at 40% 35%, #fff8e9, #f6dfca 72%, #e9cbb5);
+    }
+    .icing-ring .cylinder__bottom { background: #f0d5c1; }
 
-                // Actualizar el menú activo
-                const items = document.querySelectorAll('.menu-item');
-                items.forEach(item => item.classList.remove('active'));
-                event.target.closest('.menu-item').classList.add('active');
-            }
-        </script>
-    </body>
+    .pearls {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      transform-style: preserve-3d;
+    }
+
+    .pearl {
+      position: absolute;
+      top: -3.5px;
+      left: -3.5px;
+      width: 7px;
+      height: 7px;
+      border: 1px solid rgba(197, 151, 123, .24);
+      border-radius: 50%;
+      background: radial-gradient(circle at 31% 27%, #fff 0 12%, #fff5df 46%, #e8bf9f 100%);
+      box-shadow: 0 1px 3px rgba(106, 55, 48, .15);
+    }
+
+    .cake__candles {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      width: 0;
+      height: 0;
+      transform-style: preserve-3d;
+    }
+
+    .candle {
+      position: absolute;
+      width: 10px;
+      height: 44px;
+      border: 1px solid rgba(148, 79, 69, .2);
+      border-radius: 5px 5px 2px 2px;
+      background: repeating-linear-gradient(135deg, #fff8e8 0 5px, #d86b7b 5px 9px, #fff8e8 9px 12px);
+      box-shadow: inset 2px 0 3px rgba(255,255,255,.7), 2px 2px 3px rgba(96,47,47,.12);
+      transform-style: preserve-3d;
+    }
+
+    .candle::before {
+      position: absolute;
+      top: -3px;
+      left: 3px;
+      width: 3px;
+      height: 5px;
+      border-radius: 2px;
+      background: #5b3633;
+      content: "";
+    }
+
+    .flame {
+      position: absolute;
+      top: -19px;
+      left: 1px;
+      width: 11px;
+      height: 15px;
+      border-radius: 50% 50% 50% 8%;
+      background: radial-gradient(ellipse at 37% 68%, #fffbd0 0 18%, #ffd36d 43%, #f28b49 75%, transparent 79%);
+      filter: drop-shadow(0 0 5px rgba(247, 164, 77, .7));
+      transform: rotate(-45deg);
+      transform-origin: 50% 78%;
+      animation: flame 1.15s ease-in-out infinite alternate;
+    }
+
+    .berry {
+      position: absolute;
+      width: 17px;
+      height: 17px;
+      border: 1px solid rgba(113, 38, 55, .18);
+      border-radius: 48% 52% 56% 44%;
+      background: radial-gradient(circle at 31% 26%, #ffbac0 0 8%, #df6474 37%, #ab354f 100%);
+      box-shadow: 2px 3px 4px rgba(115, 49, 50, .18);
+      transform-style: preserve-3d;
+    }
+
+    .berry::after {
+      position: absolute;
+      top: -4px;
+      left: 6px;
+      width: 7px;
+      height: 5px;
+      border-radius: 80% 0 80% 0;
+      background: #718b58;
+      content: "";
+      transform: rotate(-25deg);
+    }
+
+    @keyframes turn {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    @keyframes turn-mobile {
+      from { transform: rotateY(0deg) scale(.76); }
+      to { transform: rotateY(360deg) scale(.76); }
+    }
+
+    @keyframes turn-small {
+      from { transform: rotateY(0deg) scale(.68); }
+      to { transform: rotateY(360deg) scale(.68); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(4px); }
+      50% { transform: translateY(-9px); }
+    }
+
+    @keyframes flame {
+      from { transform: rotate(-48deg) scale(.94, 1.02); opacity: .88; }
+      to { transform: rotate(-41deg) scale(1.05, .96); opacity: 1; }
+    }
+
+    @media (max-width: 520px) {
+      .stage { min-height: 340px; }
+      .cake-spin { animation-name: turn-mobile; }
+      .shadow { width: 220px; top: calc(50% + 131px); filter: blur(14px); }
+    }
+
+    @media (max-width: 360px) {
+      .cake-spin { animation-name: turn-small; }
+      .shadow { width: 190px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cake-spin, .cake-float, .flame { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" role="img" aria-label="Pastel rosa de tres pisos con fresas y velas encendidas, girando lentamente">
+    <div class="shadow" aria-hidden="true"></div>
+    <div class="cake-float" aria-hidden="true">
+      <div class="cake-spin">
+        <div class="cake-model" id="cake-model"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const model = document.getElementById("cake-model");
+      const segments = 64;
+
+      function cylinder({ diameter, height, bottom, className, top = true, bottomFace = true }) {
+        const element = document.createElement("div");
+        element.className = `cylinder ${className}`;
+        element.style.width = `${diameter}px`;
+        element.style.height = `${height}px`;
+        element.style.bottom = `${bottom}px`;
+
+        const side = document.createElement("div");
+        side.className = "cylinder__side";
+        const radius = diameter / 2;
+        const faceWidth = 2 * radius * Math.tan(Math.PI / segments) + .4;
+
+        for (let i = 0; i < segments; i += 1) {
+          const face = document.createElement("i");
+          const angle = 360 / segments * i;
+          const light = .76 + .24 * ((Math.cos(angle * Math.PI / 180) + 1) / 2);
+          face.className = "cylinder__face";
+          face.style.width = `${faceWidth}px`;
+          face.style.height = `${height}px`;
+          face.style.transform = `translate(-50%, -50%) rotateY(${angle}deg) translateZ(${radius}px)`;
+          face.style.filter = `brightness(${light.toFixed(2)})`;
+          side.append(face);
+        }
+        element.append(side);
+
+        if (top) {
+          const cap = document.createElement("div");
+          cap.className = "cylinder__top";
+          cap.style.width = `${diameter}px`;
+          cap.style.height = `${diameter}px`;
+          element.append(cap);
+        }
+        if (bottomFace) {
+          const cap = document.createElement("div");
+          cap.className = "cylinder__bottom";
+          cap.style.width = `${diameter}px`;
+          cap.style.height = `${diameter}px`;
+          element.append(cap);
+        }
+        model.append(element);
+      }
+
+      function pearls(diameter, height, bottom, count) {
+        const row = document.createElement("div");
+        row.className = "pearls";
+        row.style.top = `${300 - bottom - height + 13}px`;
+        for (let i = 0; i < count; i += 1) {
+          const bead = document.createElement("i");
+          const angle = 360 / count * i;
+          bead.className = "pearl";
+          bead.style.transform = `rotateY(${angle}deg) translateZ(${diameter / 2 + 1}px)`;
+          row.append(bead);
+        }
+        model.append(row);
+      }
+
+      cylinder({ diameter: 336, height: 13, bottom: 14, className: "tier--plate" });
+      cylinder({ diameter: 296, height: 110, bottom: 23, className: "tier--base" });
+      cylinder({ diameter: 300, height: 13, bottom: 120, className: "icing-ring", top: false, bottomFace: false });
+      pearls(296, 110, 23, 56);
+
+      cylinder({ diameter: 224, height: 88, bottom: 122, className: "tier--middle" });
+      cylinder({ diameter: 228, height: 12, bottom: 198, className: "icing-ring", top: false, bottomFace: false });
+      pearls(224, 88, 122, 48);
+
+      cylinder({ diameter: 148, height: 70, bottom: 202, className: "tier--top" });
+      cylinder({ diameter: 152, height: 10, bottom: 262, className: "icing-ring", top: false, bottomFace: false });
+      pearls(148, 70, 202, 36);
+
+      const candles = document.createElement("div");
+      candles.className = "cake__candles";
+      [
+        { x: -29, z: -17 },
+        { x: 0, z: 5 },
+        { x: 29, z: -17 },
+      ].forEach(({ x, z }) => {
+        const candle = document.createElement("div");
+        candle.className = "candle";
+        candle.style.left = `${x - 5}px`;
+        candle.style.top = "-43px";
+        candle.style.transform = `translateZ(${z}px)`;
+        const flame = document.createElement("span");
+        flame.className = "flame";
+        candle.append(flame);
+        candles.append(candle);
+      });
+      model.append(candles);
+
+      [
+        { x: -47, z: 14, y: 36 },
+        { x: 48, z: 8, y: 45 },
+        { x: 0, z: -48, y: 32 },
+      ].forEach(({ x, z, y }) => {
+        const berry = document.createElement("span");
+        berry.className = "berry";
+        berry.style.left = `calc(50% + ${x - 8}px)`;
+        berry.style.top = `${y}px`;
+        berry.style.transform = `translateZ(${z}px) rotate(${x * 2}deg)`;
+        model.append(berry);
+      });
+    })();
+  </script>
+</body>
 </html>
